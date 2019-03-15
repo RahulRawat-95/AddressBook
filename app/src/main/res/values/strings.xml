@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Address</string>
+    <string name="label_main_activity">Addresses</string>
+    <string name="label_add_edit_address_activity">Add Address</string>
+    <string name="blank_heading">Your Address book is Blank</string>
+    <string name="blank_sub_heading">Kindly add shipping / billing\n address and enjoy faster\n checkout</string>
+    <string name="label_name">Name</string>
+    <string name="label_address_line_1">Address Line 1</string>
+    <string name="label_address_line_2">Address Line 2</string>
+    <string name="label_landmark">Landmark</string>
+    <string name="label_city">City</string>
+    <string name="label_state">State</string>
+    <string name="label_pincode">Pincode</string>
+    <string name="text_default_address_cb">Make this my default address</string>
+    <string name="content_description_add_fab">Submit</string>
+    <string name="menu_edit_address">Edit</string>
+    <string name="menu_delete_address">Delete</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="error_load_data">Please Try Again</string>
+    <string name="error_form_invalid">Please Fill all Fields</string>
+</resources>

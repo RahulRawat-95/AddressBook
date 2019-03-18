@@ -4,5 +4,5 @@
     <color name="colorPrimaryDark">#387AC8</color>
     <color name="colorAccent">#FF9800</color>
     <color name="iconColor">#ffffff</color>
-    <color name="loadingBackgroundColor">#aa000000</color>
+    <color name="loadingBackgroundColor">#22000000</color>
 </resources>

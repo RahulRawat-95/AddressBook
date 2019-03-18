@@ -9,29 +9,30 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 
+/**
+ * View Model class for AddEditAddressActivity
+ *
+ * @property application the application object
+ */
 class AddEditAddressViewModel(application: Application) : AndroidViewModel(application) {
+
+    /**
+     * Method that creates an Address and calls the api
+     *
+     * @param address the address to be created
+     * @param lambda the callback to be called when api returns either successfully or fails with throwable or address respectively
+     */
     fun createAddress(
-        firstName: String,
-        address1: String,
-        address2: String,
-        city: String,
-        stateName: String? = "Delhi",
-        zipCode: String,
-        countryId: Int = 105,
-        stateId: Int = 1400,
-        phone: String = 9875648521.toString(),
+        address: Address,
         lambda: (e: Throwable?, id: Address?) -> Unit
     ) {
         val observer = ApiClient.apiInterface.createAddress(
-            firstName,
-            address1,
-            address2,
-            city,
-            stateName ?: "Delhi",
-            zipCode,
-            countryId,
-            stateId,
-            phone
+            address.firstName,
+            address.address1,
+            address.address2,
+            address.city,
+            address.stateName,
+            address.zipCode
         )
         observer.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -55,30 +56,24 @@ class AddEditAddressViewModel(application: Application) : AndroidViewModel(appli
             })
     }
 
+    /**
+     * Method that updates an Address and calls the api
+     *
+     * @param address the address to be updated
+     * @param lambda the callback to be called when api returns either successfully or fails with throwable or address respectively
+     */
     fun updateAddress(
-        addressId: String,
-        firstName: String,
-        address1: String,
-        address2: String,
-        city: String,
-        stateName: String? = "Delhi",
-        zipCode: String,
-        countryId: Int = 105,
-        stateId: Int = 1400,
-        phone: String = 9875648521.toString(),
+        address: Address,
         lambda: (e: Throwable?, id: Address?) -> Unit
     ) {
         val observer = ApiClient.apiInterface.updateAddress(
-            addressId,
-            firstName,
-            address1,
-            address2,
-            city,
-            stateName ?: "Delhi",
-            zipCode,
-            countryId,
-            stateId,
-            phone
+            address.id.toString(),
+            address.firstName,
+            address.address1,
+            address.address2,
+            address.city,
+            address.stateName,
+            address.zipCode
         )
         observer.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

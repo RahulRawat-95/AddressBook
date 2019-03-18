@@ -12,11 +12,19 @@ import com.example.address.R
 import com.example.address.model.Address
 import com.example.address.repository.defaultAddressId
 
+/**
+ * Class that works as adapter for Address objects
+ *
+ * @property context context object for popup menu
+ * @property addresses list of Address to inflate
+ * @property deleteLambda callback for deleting address
+ * @property editLambda callback for editing address
+ */
 class AddressAdapter(
-    val context: Context,
+    private val context: Context,
     var addresses: MutableList<Address>?,
-    var deleteLambda: (Address) -> Unit = {},
-    var editLambda: (Address) -> Unit = {}
+    private var deleteLambda: (Address) -> Unit = {},
+    private var editLambda: (Address) -> Unit = {}
 ) :
     RecyclerView.Adapter<AddressAdapter.ViewHolder>() {
 
@@ -54,7 +62,6 @@ class AddressAdapter(
         }
 
         holder.defaultCheck.visibility = if (address.id == defaultAddressId) View.VISIBLE else View.INVISIBLE
-
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

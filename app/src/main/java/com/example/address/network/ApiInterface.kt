@@ -6,9 +6,11 @@ import io.reactivex.Observable
 import retrofit2.http.*
 
 interface ApiInterface {
+    //api to get all addresses
     @GET("/api/ams/user/addresses/")
     fun getAddresses(@Query("token") token: String = "52e04d83e87e509f07982e6ac851e2d2c67d1d0eabc4fe78"): Observable<MutableList<Address>>
 
+    //api to create a new address
     @POST("/api/ams/user/addresses/")
     fun createAddress(
         @Query("address[firstname]") firstName: String
@@ -23,6 +25,7 @@ interface ApiInterface {
         , @Query("token") token: String = "52e04d83e87e509f07982e6ac851e2d2c67d1d0eabc4fe78"
     ): Observable<Address>
 
+    //api that updates an existing address
     @PUT("/api/ams/user/addresses/{address_id}")
     fun updateAddress(
         @Path("address_id") addressId: String
@@ -38,6 +41,7 @@ interface ApiInterface {
         , @Query("token") token: String = "52e04d83e87e509f07982e6ac851e2d2c67d1d0eabc4fe78"
     ): Observable<Address>
 
+    //api that deletes an address
     @DELETE("/api/ams/user/addresses/{address_id}")
     fun deleteAddress(
         @Path("address_id") addressId: String

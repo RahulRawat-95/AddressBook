@@ -16,6 +16,12 @@ import io.reactivex.schedulers.Schedulers
  */
 class AddEditAddressViewModel(application: Application) : AndroidViewModel(application) {
 
+    lateinit var address: Address
+
+    fun setAddresss(address: Address) {
+        this.address = address
+    }
+
     /**
      * Method that creates an Address and calls the api
      *

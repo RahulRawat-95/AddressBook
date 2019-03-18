@@ -29,6 +29,11 @@ const val EXTRA_ADDRESS = "addressToEdit"
  */
 const val EXTRA_RESULT_ADDRESS = "resultAddress"
 
+/**
+ * @property EXTRA_IS_UPDATE constant value used as key for storing if the address is being updated or created
+ */
+const val EXTRA_IS_UPDATE = "isUpdateCase"
+
 class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
 
     /**
@@ -46,17 +51,7 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * @property mAddress the Address either passed through Intent or created in this Activity
      */
-    val mAddress: Address by lazy {
-        intent
-            ?.let {
-                mIsUpdate = true
-                it.getSerializableExtra(EXTRA_ADDRESS) as? Address
-            }
-            ?: let {
-                mIsUpdate = false
-                Address(-1)
-            }
-    }
+    lateinit var mAddress: Address
 
     /**
      * @property mDefaultAddressCb the Checkbox reference in this activity's layout for making specific address default
@@ -97,7 +92,21 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //setContentView(R.layout.activity_add_edit_address)
+
+        if (savedInstanceState == null) {
+            mAddress = intent
+                ?.let {
+                    mIsUpdate = true
+                    it.getSerializableExtra(EXTRA_ADDRESS) as? Address
+                }
+                ?: let {
+                    mIsUpdate = false
+                    Address(-1)
+                }
+        } else {
+            mIsUpdate = savedInstanceState.getBoolean(EXTRA_IS_UPDATE)
+            mAddress = savedInstanceState.getSerializable(EXTRA_ADDRESS) as Address
+        }
 
         //binding for the Layout for the variable mAddress
         val binding: ActivityAddEditAddressBinding =
@@ -140,5 +149,11 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putSerializable(EXTRA_ADDRESS, mAddress)
+        outState.putSerializable(EXTRA_IS_UPDATE, mIsUpdate)
     }
 }

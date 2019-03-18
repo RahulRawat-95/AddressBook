@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.widget.CheckBox
 import android.widget.FrameLayout
@@ -155,5 +156,16 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
         super.onSaveInstanceState(outState)
         outState.putSerializable(EXTRA_ADDRESS, mAddress)
         outState.putSerializable(EXTRA_IS_UPDATE, mIsUpdate)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            android.R.id.home -> {
+                if (mProgressBar.visibility != View.VISIBLE)
+                    finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

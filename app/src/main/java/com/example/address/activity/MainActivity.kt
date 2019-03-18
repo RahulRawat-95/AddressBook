@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -129,6 +130,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     animate()
                         .alpha(1f)
                         .setDuration(100L)
+                        .setListener(null)
                 }
 
                 //apply fade out animation to fromView
@@ -159,6 +161,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     return true
                 mIsFetchingAddress = true
                 mMainViewModel.getAddresses { mIsFetchingAddress = false }
+                return true
+            }
+            android.R.id.home -> {
+                if (mLoadingView.visibility != View.VISIBLE)
+                    finish()
                 return true
             }
         }
@@ -196,7 +203,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
      */
     private fun deleteAddress(address: Address) {
         mLoadingView.visibility = View.VISIBLE
+        mIsFetchingAddress = true
         mMainViewModel.deleteAddress(address.id.toString()) {
+            mIsFetchingAddress = false
             mLoadingView.visibility = View.GONE
             if (it != null)
                 showErrorToast(this@MainActivity)
@@ -247,7 +256,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     REQUEST_CREATE_ADDRESS
                 )
             }
-
         }
     }
 }

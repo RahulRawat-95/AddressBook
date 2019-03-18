@@ -9,14 +9,27 @@ import com.example.address.R
 
 class SplashActivity : AppCompatActivity() {
 
+    val handler by lazy { Handler() }
+
+    val runnable by lazy {
+        object : Runnable {
+            override fun run() {
+                startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                finish()
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash)
         //delayed start to Main Activity
-        Handler().postDelayed({
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }, 1000)
+        handler.postDelayed(runnable, 1000)
+    }
+
+    override fun onDestroy() {
+        handler.removeCallbacks(runnable)
+        super.onDestroy()
     }
 
 }

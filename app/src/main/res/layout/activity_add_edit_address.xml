@@ -54,6 +54,7 @@
                                 android:layout_height="match_parent"
                                 android:inputType="textCapWords"
                                 android:text="@={address.firstName}"
+                                app:error="@{address.firstNameError}"
                                 android:maxLength="25"
                                 android:maxLines="1" />
 
@@ -76,6 +77,7 @@
                                 android:inputType="textCapWords"
                                 android:layout_height="match_parent"
                                 android:text="@={address.address1}"
+                                app:error="@{address.address1Error}"
                                 android:maxLength="50"
                                 android:maxLines="1" />
 
@@ -98,6 +100,7 @@
                                 android:inputType="textCapWords"
                                 android:layout_height="match_parent"
                                 android:text="@={address.address2}"
+                                app:error="@{address.address2Error}"
                                 android:maxLength="50"
                                 android:maxLines="1" />
 
@@ -141,6 +144,7 @@
                                 android:inputType="textCapWords"
                                 android:layout_height="match_parent"
                                 android:text="@={address.city}"
+                                app:error="@{address.cityError}"
                                 android:maxLength="25"
                                 android:maxLines="1" />
 
@@ -185,6 +189,7 @@
                                 android:inputType="number"
                                 android:layout_height="match_parent"
                                 android:text="@={address.zipCode}"
+                                app:error="@{address.zipCodeError}"
                                 android:maxLength="6"
                                 android:maxLines="1" />
 

@@ -50,7 +50,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
 
                 override fun onError(e: Throwable) {
-                    showErrorToast(getApplication())
+                    showErrorToast(getApplication(), e)
                     lambda(e)
                 }
 

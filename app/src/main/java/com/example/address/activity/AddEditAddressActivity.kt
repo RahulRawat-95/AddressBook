@@ -74,7 +74,7 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
         mProgressBar.visibility = View.GONE
         //If Error occurred during api call
         if (t != null)
-            showErrorToast(this@AddEditAddressActivity)
+            showErrorToast(this@AddEditAddressActivity, t)
         else {
             //if default address is checked then the default address id is changed
             if (mDefaultAddressCb.isChecked)

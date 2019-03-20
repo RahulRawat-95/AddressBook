@@ -3,6 +3,7 @@
           package="com.example.address">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
             android:name="androidx.multidex.MultiDexApplication"
@@ -30,6 +31,18 @@
                 android:name=".activity.AddEditAddressActivity"
                 android:parentActivityName=".activity.MainActivity"
                 android:label="@string/label_add_edit_address_activity" />
+
+        <receiver
+                android:name=".broadcastReceiver.InternetReceiver"
+                android:enabled="true">
+            <intent-filter>
+
+                <!-- Intent filters for broadcast receiver -->
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+                <action android:name="android.net.wifi.STATE_CHANGE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

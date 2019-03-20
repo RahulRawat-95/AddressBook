@@ -11,14 +11,33 @@ import com.example.address.R
 var defaultAddressId: Int = -1
 
 /**
+ * @property isInternetConnected to tell whether Internet is connected or not
+ */
+var isInternetConnected: Boolean? = null
+
+/**
+ * @property toast to show and cancel Toasts
+ */
+var toast: Toast? = null
+
+/**
  * method that shows error toast of Please Try Again
  *
  * @param context the context object to show Toast
  *
  * @return Unit
  */
-fun showErrorToast(context: Context) {
-    Toast.makeText(context, R.string.error_load_data, Toast.LENGTH_LONG)
-        .apply { setGravity(Gravity.CENTER, 0, 0) }
-        .show()
+fun showErrorToast(context: Context, e: Throwable) {
+    if (toast != null) {
+        toast?.cancel()
+    }
+    toast = when {
+        isInternetConnected != null && !(isInternetConnected!!) -> {
+            Toast.makeText(context, R.string.error_internet_connect, Toast.LENGTH_LONG)
+                .apply { setGravity(Gravity.CENTER, 0, 0) }
+        }
+        else -> Toast.makeText(context, R.string.error_load_data, Toast.LENGTH_LONG)
+            .apply { setGravity(Gravity.CENTER, 0, 0) }
+    }
+    toast?.show()
 }

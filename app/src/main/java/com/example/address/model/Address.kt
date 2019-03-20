@@ -1,6 +1,10 @@
 package com.example.address.model
 
 import android.text.TextUtils
+import androidx.databinding.BaseObservable
+import androidx.databinding.Bindable
+import com.example.address.BR
+import com.example.address.databinding.ActivityAddEditAddressBinding
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
@@ -23,25 +27,55 @@ import java.io.Serializable
  *
  * @constructor Creates a new Address with a default ID that was provided
  */
-data class Address(@SerializedName("id") var id: Int) : Serializable {
+data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serializable {
 
+    @Bindable
     @SerializedName("firstname")
     var firstName: String = ""
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.firstName)
+            notifyPropertyChanged(BR.firstNameError)
+        }
 
     @SerializedName("lastname")
     var lastName: String? = null
 
+    @Bindable
     @SerializedName("address1")
     var address1: String = ""
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.address1)
+            notifyPropertyChanged(BR.address1Error)
+        }
 
+    @Bindable
     @SerializedName("address2")
     var address2: String = ""
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.address2)
+            notifyPropertyChanged(BR.address2Error)
+        }
 
+    @Bindable
     @SerializedName("city")
     var city: String = ""
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.city)
+            notifyPropertyChanged(BR.cityError)
+        }
 
+    @Bindable
     @SerializedName("zipcode")
     var zipCode: String = ""
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.zipCode)
+            notifyPropertyChanged(BR.zipCodeError)
+        }
 
     @SerializedName("phone")
     var phone: String? = null
@@ -72,4 +106,20 @@ data class Address(@SerializedName("id") var id: Int) : Serializable {
                 && !TextUtils.isEmpty(address2)
                 && !TextUtils.isEmpty(city)
                 && !TextUtils.isEmpty(zipCode)
+
+    @Bindable
+    fun getFirstNameError() = if (firstName.isEmpty()) "Required" else null
+
+    @Bindable
+    fun getAddress1Error() = if (address1.isEmpty()) "Required" else null
+
+    @Bindable
+    fun getAddress2Error() = if (address2.isEmpty()) "Required" else null
+
+    @Bindable
+    fun getCityError() = if (city.isEmpty()) "Required" else null
+
+    @Bindable
+    fun getZipCodeError() = if (zipCode.isEmpty()) "Required" else null
+
 }

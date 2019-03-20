@@ -208,7 +208,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             mIsFetchingAddress = false
             mLoadingView.visibility = View.GONE
             if (it != null)
-                showErrorToast(this@MainActivity)
+                showErrorToast(this@MainActivity, it)
         }
     }
 

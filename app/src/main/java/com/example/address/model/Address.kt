@@ -7,6 +7,7 @@ import com.example.address.BR
 import com.example.address.databinding.ActivityAddEditAddressBinding
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
+import kotlin.reflect.KMutableProperty
 
 /**
  * class that represents an Address
@@ -35,7 +36,8 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
         set(value) {
             field = value
             notifyPropertyChanged(BR.firstName)
-            notifyPropertyChanged(BR.firstNameError)
+
+            setErrors(this@Address::firstnameError, value, "Enter your Full Name")
         }
 
     @SerializedName("lastname")
@@ -47,7 +49,8 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
         set(value) {
             field = value
             notifyPropertyChanged(BR.address1)
-            notifyPropertyChanged(BR.address1Error)
+
+            setErrors(this@Address::address1Error, value, "Enter your Address Line 1")
         }
 
     @Bindable
@@ -56,7 +59,8 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
         set(value) {
             field = value
             notifyPropertyChanged(BR.address2)
-            notifyPropertyChanged(BR.address2Error)
+
+            setErrors(this@Address::address2Error, value, "Enter your Address Line 2")
         }
 
     @Bindable
@@ -65,7 +69,8 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
         set(value) {
             field = value
             notifyPropertyChanged(BR.city)
-            notifyPropertyChanged(BR.cityError)
+
+            setErrors(this@Address::cityError, value, "Enter your City")
         }
 
     @Bindable
@@ -74,7 +79,8 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
         set(value) {
             field = value
             notifyPropertyChanged(BR.zipCode)
-            notifyPropertyChanged(BR.zipCodeError)
+
+            setErrors(this@Address::zipcodeError, value, "Enter your Zip Code")
         }
 
     @SerializedName("phone")
@@ -101,25 +107,56 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
      * @return Boolean
      */
     fun isFormValid() =
-        !TextUtils.isEmpty(firstName)
-                && !TextUtils.isEmpty(address1)
-                && !TextUtils.isEmpty(address2)
-                && !TextUtils.isEmpty(city)
-                && !TextUtils.isEmpty(zipCode)
+        setErrors(this@Address::firstnameError, firstName, "Enter your Full Name")
+            .and(setErrors(this@Address::address1Error, address1, "Enter your Address Line 1"))
+            .and(setErrors(this@Address::address2Error, address2, "Enter your Address Line 2"))
+            .and(setErrors(this@Address::cityError, city, "Enter your City"))
+            .and(setErrors(this@Address::zipcodeError, zipCode, "Enter your Zip Code"))
 
     @Bindable
-    fun getFirstNameError() = if (firstName.isEmpty()) "Required" else null
+    var firstnameError: String? = null
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.firstnameError)
+        }
 
     @Bindable
-    fun getAddress1Error() = if (address1.isEmpty()) "Required" else null
+    var address1Error: String? = null
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.address1Error)
+        }
 
     @Bindable
-    fun getAddress2Error() = if (address2.isEmpty()) "Required" else null
+    var address2Error: String? = null
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.address2Error)
+        }
 
     @Bindable
-    fun getCityError() = if (city.isEmpty()) "Required" else null
+    var cityError: String? = null
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.cityError)
+        }
 
     @Bindable
-    fun getZipCodeError() = if (zipCode.isEmpty()) "Required" else null
+    var zipcodeError: String? = null
+        set(value) {
+            field = value
+            notifyPropertyChanged(BR.zipcodeError)
+        }
 
+    companion object {
+        fun setErrors(prop: KMutableProperty<String?>, value: String?, error: String): Boolean {
+            if (value?.isBlank() ?: true) {
+                prop.setter.call(error)
+                return false
+            } else {
+                prop.setter.call(null)
+                return true
+            }
+        }
+    }
 }

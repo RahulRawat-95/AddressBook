@@ -6,6 +6,10 @@
         <variable
                 name="address"
                 type="com.example.address.model.Address" />
+
+        <variable
+                name="defaultAddressID"
+                type="int" />
     </data>
     <LinearLayout
             android:layout_height="match_parent"
@@ -55,6 +59,7 @@
                                 android:layout_height="match_parent"
                                 android:inputType="textCapWords"
                                 android:text="@={address.firstName}"
+                                android:selection="@{address.firstName.length()}"
                                 android:maxLength="25"
                                 android:maxLines="1" />
 
@@ -78,6 +83,7 @@
                                 android:inputType="textCapWords"
                                 android:layout_height="match_parent"
                                 android:text="@={address.address1}"
+                                android:selection="@{address.address1.length()}"
                                 android:maxLength="50"
                                 android:maxLines="1" />
 
@@ -101,6 +107,7 @@
                                 android:inputType="textCapWords"
                                 android:layout_height="match_parent"
                                 android:text="@={address.address2}"
+                                android:selection="@{address.address2.length()}"
                                 android:maxLength="50"
                                 android:maxLines="1" />
 
@@ -145,6 +152,7 @@
                                 android:inputType="textCapWords"
                                 android:layout_height="match_parent"
                                 android:text="@={address.city}"
+                                android:selection="@{address.city.length()}"
                                 android:maxLength="25"
                                 android:maxLines="1" />
 
@@ -167,6 +175,7 @@
                                 android:inputType="textCapWords"
                                 android:layout_height="match_parent"
                                 android:text="@={address.stateName}"
+                                android:selection="@{address.stateName.length()}"
                                 android:maxLength="25"
                                 android:maxLines="1" />
 
@@ -185,11 +194,14 @@
                             app:layout_constraintStart_toStartOf="@id/editText6">
 
                         <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/tiet_pincode"
                                 android:layout_width="match_parent"
+                                android:imeOptions="actionDone"
                                 android:hint="@string/label_pincode"
                                 android:inputType="number"
                                 android:layout_height="match_parent"
                                 android:text="@={address.zipCode}"
+                                android:selection="@{address.zipCode.length()}"
                                 android:maxLength="6"
                                 android:maxLines="1" />
 
@@ -203,7 +215,7 @@
                             app:layout_constraintStart_toStartOf="@id/editText7"
                             android:layout_marginTop="@dimen/margin_add_address_widget"
                             app:layout_constraintTop_toBottomOf="@id/editText7"
-                            android:checked="true" />
+                            android:checked="@{address.id==defaultAddressID}" />
 
                     <ImageButton
                             android:contentDescription="@string/content_description_add_fab"

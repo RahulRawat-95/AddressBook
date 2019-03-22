@@ -5,13 +5,13 @@ import android.animation.AnimatorListenerAdapter
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.address.R
 import com.example.address.adapter.AddressAdapter
@@ -19,7 +19,9 @@ import com.example.address.model.Address
 import com.example.address.repository.showErrorToast
 import com.example.address.ui.EmptyRecyclerView
 import com.example.address.viewModel.MainViewModel
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.android.synthetic.main.layout_addresses.*
+import kotlinx.android.synthetic.main.layout_addresses_empty_view.*
+
 
 /**
  * @property REQUEST_CREATE_ADDRESS request code int for Creating Address
@@ -92,9 +94,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        findViewById<FloatingActionButton>(R.id.fab_add_address).setOnClickListener(this)
+        fab_add_address.setOnClickListener(this)
 
-        findViewById<FloatingActionButton>(R.id.fab_add).setOnClickListener(this)
+        fab_add.setOnClickListener(this)
 
         mRecyclerView.run {
             //set callback for recycler view to call when it senses the change in no of items in list
@@ -145,6 +147,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = mAddressAdapter
+
+            val dividerItemDecoration = DividerItemDecoration(
+                getContext(),
+                (layoutManager as LinearLayoutManager).getOrientation()
+            )
+
+            addItemDecoration(dividerItemDecoration)
         }
     }
 

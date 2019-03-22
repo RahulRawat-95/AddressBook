@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -17,8 +18,11 @@ import com.example.address.R
 import com.example.address.databinding.ActivityAddEditAddressBinding
 import com.example.address.model.Address
 import com.example.address.repository.defaultAddressId
+import com.example.address.repository.putDefaultAddressId
 import com.example.address.repository.showErrorToast
 import com.example.address.viewModel.AddEditAddressViewModel
+import com.google.android.material.textfield.TextInputEditText
+import kotlinx.android.synthetic.main.activity_add_edit_address.*
 
 /**
  * @property EXTRA_ADDRESS constant value for passing address through Intent
@@ -66,6 +70,11 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
     val mProgressBar by lazy { findViewById<FrameLayout>(R.id.fl_loading) }
 
     /**
+     * @property mSubmitButton the submit button that creates or updates an address
+     */
+    val mSubmitButton by lazy { findViewById<ImageButton>(R.id.imageButton) }
+
+    /**
      * @property mResultCallback the lambda callback to be called by ViewModel when the processing for creation or updating of address finishes successfully
      * @param t Throwable reference that is thrown if some error occurs while calling the Api
      * @param address Address reference that was created or updated
@@ -82,6 +91,8 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
             //if default address is unchecked when the address currently shown was the default address before
             else if (defaultAddressId == address?.id)
                 defaultAddressId = -1
+
+            putDefaultAddressId(defaultAddressId)
 
             //put extras in intent and finish the activity
             val intent = Intent()
@@ -114,12 +125,23 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
             DataBindingUtil.setContentView(this, R.layout.activity_add_edit_address)
 
         binding.address = mAddress
+        binding.defaultAddressID = defaultAddressId
 
         setSupportActionBar(findViewById(R.id.toolbar))
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        findViewById<ImageButton>(R.id.imageButton).setOnClickListener(this)
+        mSubmitButton.setOnClickListener(this)
+
+        tiet_pincode.setOnEditorActionListener { _, actionId, _ ->
+            when (actionId) {
+                EditorInfo.IME_ACTION_DONE -> {
+                    mSubmitButton.callOnClick()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     override fun onClick(v: View?) {

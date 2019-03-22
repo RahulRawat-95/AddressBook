@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
 import com.example.address.R
+import com.example.address.repository.defaultAddressId
+import com.example.address.repository.getDefaultAddressId
 import com.example.address.repository.isInternetConnected
 
 class SplashActivity : AppCompatActivity() {
@@ -16,7 +18,10 @@ class SplashActivity : AppCompatActivity() {
     val runnable by lazy {
         object : Runnable {
             override fun run() {
-                val connectivityManager = this@SplashActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+                defaultAddressId = getDefaultAddressId()
+
+                val connectivityManager =
+                    this@SplashActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
                 val networkInfo = connectivityManager.activeNetworkInfo
 

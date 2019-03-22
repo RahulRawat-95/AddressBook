@@ -5,6 +5,8 @@ import android.view.Gravity
 import android.widget.Toast
 import com.example.address.R
 
+const val DEFAULT_ADDRESS_ID = "default_address_id"
+
 /**
  * @property defaultAddressId address id of the default address
  */

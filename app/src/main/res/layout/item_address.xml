@@ -36,7 +36,9 @@
             android:layout_marginStart="24dp"
             app:layout_constraintEnd_toStartOf="@id/iv_default_address"
             android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp" />
+            android:layout_marginRight="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="10dp" />
     <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

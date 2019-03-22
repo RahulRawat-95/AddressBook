@@ -28,6 +28,7 @@
                 android:launchMode="singleTop" />
 
         <activity
+                android:windowSoftInputMode="adjustResize"
                 android:name=".activity.AddEditAddressActivity"
                 android:parentActivityName=".activity.MainActivity"
                 android:label="@string/label_add_edit_address_activity" />

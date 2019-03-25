@@ -4,10 +4,12 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -15,6 +17,8 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.address.R
 import com.example.address.adapter.AddressAdapter
+import com.example.address.connectivityListener.InternetNetworkCallback
+import com.example.address.connectivityListener.InternetReceiver
 import com.example.address.model.Address
 import com.example.address.repository.showErrorToast
 import com.example.address.ui.EmptyRecyclerView
@@ -38,50 +42,55 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * @property mRecyclerView reference to RecyclerView in the Layout
      */
-    lateinit var mRecyclerView: EmptyRecyclerView
+    private lateinit var mRecyclerView: EmptyRecyclerView
     /**
      * @property mEmptyView reference to Empty View for mRecyclerView's usage when list it is showing is empty
      */
-    lateinit var mEmptyView: View
+    private lateinit var mEmptyView: View
     /**
      * @property mMainView reference to Main View that holds mRecyclerView to show when recycler view is not empty
      */
-    lateinit var mMainView: View
+    private lateinit var mMainView: View
     /**
      * @property mLoadingView reference to the ProgressBar content layout's reference in the layout for showing progress bar and disabling touches until processing finishes when
      * user deletes some address
      */
-    lateinit var mLoadingView: View
+    private lateinit var mLoadingView: View
 
     /**
      * @property mIsFetchingAddress boolean that stores if the api that fetches the Addresses list is being called or not currently
      */
-    var mIsFetchingAddress = false
+    private var mIsFetchingAddress = false
     /**
      * @property mIsEmptyViewVisible boolean that stores if the empty view for recycler view is currently being shown or not
      */
-    var mIsEmptyViewVisible = true
+    private var mIsEmptyViewVisible = true
 
     /**
      * @property mMainViewModel the View Model associated with this activity
      */
-    val mMainViewModel by lazy { ViewModelProviders.of(this@MainActivity).get(MainViewModel::class.java) }
+    private val mMainViewModel by lazy { ViewModelProviders.of(this@MainActivity).get(MainViewModel::class.java) }
 
     /**
      * @property mAddressAdapter the Adapter for mRecyclerView
      */
-    val mAddressAdapter by lazy {
+    private val mAddressAdapter by lazy {
         AddressAdapter(
             this@MainActivity,
             mMainViewModel.addresses.value,
-            this@MainActivity::deleteAddress,
-            this@MainActivity::editAddress
+            this@MainActivity::popupMenuShow
         )
     }
+
+    private val mInternetReceiver by lazy { InternetReceiver() }
+
+    private val mInternetNetworkCallback by lazy { InternetNetworkCallback() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        enableInternetListener()
 
         observe()
 
@@ -149,8 +158,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             adapter = mAddressAdapter
 
             val dividerItemDecoration = DividerItemDecoration(
-                getContext(),
-                (layoutManager as LinearLayoutManager).getOrientation()
+                context,
+                (layoutManager as LinearLayoutManager).orientation
             )
 
             addItemDecoration(dividerItemDecoration)
@@ -195,11 +204,9 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
 
         //observe the LiveData and refresh recycler view when change occurs
-        mMainViewModel.addresses.observe(this@MainActivity, object : Observer<MutableList<Address>> {
-            override fun onChanged(t: MutableList<Address>?) {
-                mAddressAdapter.addresses = t
-                mAddressAdapter.notifyDataSetChanged()
-            }
+        mMainViewModel.addresses.observe(this@MainActivity, Observer<MutableList<Address>> { t: MutableList<Address>? ->
+            mAddressAdapter.addresses = t
+            mAddressAdapter.notifyDataSetChanged()
         })
     }
 
@@ -234,6 +241,34 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         startActivityForResult(intent, REQUEST_UPDATE_ADDRESS)
     }
 
+    /**
+     * method that shows popup menu over item whose popup icon was clicked
+     *
+     * @param view Item whose popup icon was clicked
+     * @param address Address resembled by the item view which was clicked
+     *
+     * @return Unit
+     */
+    private fun popupMenuShow(view: View, address: Address) {
+        val popupMenu = PopupMenu(this, view)
+        popupMenu.inflate(R.menu.menu_address)
+        popupMenu.show()
+
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.edit_address -> {
+                    editAddress(address)
+                    true
+                }
+                R.id.delete_address -> {
+                    deleteAddress(address)
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
@@ -265,6 +300,27 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                     REQUEST_CREATE_ADDRESS
                 )
             }
+        }
+    }
+
+    override fun onDestroy() {
+        disableInternetListener()
+        super.onDestroy()
+    }
+
+    private fun enableInternetListener() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            mInternetReceiver.enable(this)
+        } else {
+            mInternetNetworkCallback.enable(this)
+        }
+    }
+
+    private fun disableInternetListener() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            mInternetReceiver.disable(this)
+        } else {
+            mInternetNetworkCallback.disable(this)
         }
     }
 }

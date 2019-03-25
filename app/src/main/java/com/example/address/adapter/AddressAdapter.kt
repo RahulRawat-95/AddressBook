@@ -23,8 +23,7 @@ import com.example.address.repository.defaultAddressId
 class AddressAdapter(
     private val context: Context,
     var addresses: MutableList<Address>?,
-    private var deleteLambda: (Address) -> Unit = {},
-    private var editLambda: (Address) -> Unit = {}
+    private var popupMenuLambda: (View, Address) -> Unit
 ) :
     RecyclerView.Adapter<AddressAdapter.ViewHolder>() {
 
@@ -41,25 +40,7 @@ class AddressAdapter(
         holder.addressLine2.text = address.address2
         holder.addressLine3.text = address.zipCode
 
-        holder.popupMenu.setOnClickListener {
-            val popupMenu = PopupMenu(context, it)
-            popupMenu.inflate(R.menu.menu_address)
-            popupMenu.show()
-
-            popupMenu.setOnMenuItemClickListener {
-                when (it.itemId) {
-                    R.id.edit_address -> {
-                        editLambda(address)
-                        true
-                    }
-                    R.id.delete_address -> {
-                        deleteLambda(address)
-                        true
-                    }
-                    else -> false
-                }
-            }
-        }
+        holder.popupMenu.setOnClickListener { popupMenuLambda(it, address) }
 
         holder.defaultCheck.visibility = if (address.id == defaultAddressId) View.VISIBLE else View.INVISIBLE
     }

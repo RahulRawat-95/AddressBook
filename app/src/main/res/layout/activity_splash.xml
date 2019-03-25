@@ -5,11 +5,13 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/colorPrimary">
+        android:background="@color/colorPrimary"
+        tools:ignore="overdraw">
 
     <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
+            android:contentDescription="@string/content_description_splash_image"
             app:srcCompat="@drawable/ic_splash"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

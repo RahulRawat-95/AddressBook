@@ -1,15 +1,15 @@
 package com.example.address.viewModel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.address.model.Address
 import com.example.address.network.ApiClient
 import com.example.address.repository.showErrorToast
 import com.google.gson.JsonObject
-import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
+import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 
 /**
@@ -32,26 +32,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * @return Unit
      */
     fun getAddresses(lambda: (e: Throwable?) -> Unit) {
-        val observer = ApiClient.apiInterface.getAddresses()
-        observer.subscribeOn(Schedulers.io())
+        ApiClient.apiInterface.getAddresses().subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<MutableList<Address>> {
-                override fun onComplete() {
-
-                }
-
-                override fun onSubscribe(d: Disposable) {
-
-                }
-
-                override fun onNext(t: MutableList<Address>) {
+            .subscribeWith(object : DisposableSingleObserver<MutableList<Address>>() {
+                override fun onSuccess(t: MutableList<Address>) {
                     addresses.value = t
                     lambda(null)
+                    dispose()
                 }
 
                 override fun onError(e: Throwable) {
                     showErrorToast(getApplication(), e)
                     lambda(e)
+                    dispose()
                 }
 
             })
@@ -66,26 +59,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * @return Unit
      */
     fun deleteAddress(addressId: String, lambda: (e: Throwable?) -> Unit) {
-        val observer = ApiClient.apiInterface.deleteAddress(addressId)
-        observer.subscribeOn(Schedulers.io())
+        ApiClient.apiInterface.deleteAddress(addressId).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<JsonObject> {
-                override fun onComplete() {
-
-                }
-
-                override fun onSubscribe(d: Disposable) {
-
-                }
-
-                override fun onNext(t: JsonObject) {
+            .subscribeWith(object : DisposableSingleObserver<JsonObject>() {
+                override fun onSuccess(t: JsonObject) {
                     val address = addresses.value?.find { it.id == addressId.toInt() }
                     addresses.value = addresses.value?.apply { remove(address) }
                     lambda(null)
+                    dispose()
                 }
 
                 override fun onError(e: Throwable) {
                     lambda(e)
+                    dispose()
                 }
 
             })

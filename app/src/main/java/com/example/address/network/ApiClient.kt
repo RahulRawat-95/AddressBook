@@ -14,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object ApiClient {
     const val BASE_URL = "https://shop-spree.herokuapp.com/"
 
-    val apiClient by lazy {
+    private val apiClient: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
@@ -22,7 +22,7 @@ object ApiClient {
             .build()
     }
 
-    val apiInterface by lazy {
+    val apiInterface: ApiInterface by lazy {
         apiClient
             .create(ApiInterface::class.java)
     }

@@ -1,10 +1,8 @@
 package com.example.address.model
 
-import android.text.TextUtils
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import com.example.address.BR
-import com.example.address.databinding.ActivityAddEditAddressBinding
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 import kotlin.reflect.KMutableProperty
@@ -55,7 +53,7 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
 
     @Bindable
     @SerializedName("address2")
-    var address2: String = ""
+    var address2: String? = ""
         set(value) {
             field = value
             notifyPropertyChanged(BR.address2)
@@ -87,7 +85,7 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
     var phone: String? = null
 
     @SerializedName("state_name")
-    var stateName: String = ""
+    var stateName: String? = ""
 
     @SerializedName("alternative_phone")
     var alternativePhone: String? = null
@@ -102,7 +100,7 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
     var countryId: Int = -1
 
     /**
-     * method that tells if the address has all the neccesary fields for creation
+     * method that tells if the address has all the necessary fields for creation
      *
      * @return Boolean
      */
@@ -150,12 +148,12 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
 
     companion object {
         fun setErrors(prop: KMutableProperty<String?>, value: String?, error: String): Boolean {
-            if (value?.isBlank() ?: true) {
+            return if (value?.isBlank() == true) {
                 prop.setter.call(error)
-                return false
+                false
             } else {
                 prop.setter.call(null)
-                return true
+                true
             }
         }
     }

@@ -4,11 +4,14 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.address.model.Address
 import com.example.address.network.ApiClient
+import com.example.address.repository.inflateMapWithValues
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
+import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException
 import java.lang.reflect.Field
@@ -20,7 +23,7 @@ import java.lang.reflect.Field
  */
 class AddEditAddressViewModel(application: Application) : AndroidViewModel(application) {
 
-    val jsonParser by lazy { JsonParser() }
+    private val jsonParser by lazy { JsonParser() }
 
     /**
      * Method that creates an Address and calls the api
@@ -32,32 +35,20 @@ class AddEditAddressViewModel(application: Application) : AndroidViewModel(appli
         address: Address,
         lambda: (e: Throwable?, id: Address?) -> Unit
     ) {
-        val observer = ApiClient.apiInterface.createAddress(
-            address.firstName,
-            address.address1,
-            address.address2,
-            address.city,
-            address.stateName,
-            address.zipCode
-        )
-        observer.subscribeOn(Schedulers.io())
+        ApiClient.apiInterface.createAddress(
+            HashMap<String, String>().apply { inflateMapWithValues(address) }
+        ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<Address> {
-                override fun onComplete() {
-
-                }
-
-                override fun onSubscribe(d: Disposable) {
-
-                }
-
-                override fun onNext(t: Address) {
+            .subscribeWith(object : DisposableSingleObserver<Address>() {
+                override fun onSuccess(t: Address) {
                     lambda(null, t)
+                    dispose()
                 }
 
                 override fun onError(e: Throwable) {
                     handleError(address, e)
                     lambda(e, null)
+                    dispose()
                 }
 
             })
@@ -73,76 +64,66 @@ class AddEditAddressViewModel(application: Application) : AndroidViewModel(appli
         address: Address,
         lambda: (e: Throwable?, id: Address?) -> Unit
     ) {
-        val observer = ApiClient.apiInterface.updateAddress(
+        ApiClient.apiInterface.updateAddress(
             address.id.toString(),
-            address.firstName,
-            address.address1,
-            address.address2,
-            address.city,
-            address.stateName,
-            address.zipCode
-        )
-        observer.subscribeOn(Schedulers.io())
+            HashMap<String, String>().apply { inflateMapWithValues(address) }
+        ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<Address> {
-                override fun onComplete() {
-
-                }
-
-                override fun onSubscribe(d: Disposable) {
-
-                }
-
-                override fun onNext(t: Address) {
+            .subscribeWith(object : DisposableSingleObserver<Address>() {
+                override fun onSuccess(t: Address) {
                     lambda(null, t)
+                    dispose()
                 }
 
                 override fun onError(e: Throwable) {
                     handleError(address, e)
                     lambda(e, null)
+                    dispose()
                 }
 
             })
     }
 
     private fun handleError(address: Address, e: Throwable) {
-        val httpException = e as? HttpException
-        val errorBody = httpException?.response()?.errorBody()?.string()
-        if (errorBody != null) {
-            val errors = jsonParser.parse(errorBody).asJsonObject.getAsJsonObject("errors")
-            val singleErrorMessage = StringBuilder("")
-            var values: JsonArray
-            var field: Field
-            for ((key, value) in errors.entrySet()) {
-                singleErrorMessage.clear()
-                singleErrorMessage.append(key)
-                singleErrorMessage.append(" ")
-                if (value.isJsonArray) {
-                    values = value.asJsonArray
+        try {
+            val httpException = e as? HttpException
+            val errorBody = httpException?.response()?.errorBody()?.string()
+            if (errorBody != null) {
+                val errors = jsonParser.parse(errorBody).asJsonObject.getAsJsonObject("errors")
+                val singleErrorMessage = StringBuilder("")
+                var values: JsonArray
+                var field: Field
+                for ((key, value) in errors.entrySet()) {
+                    singleErrorMessage.clear()
+                    singleErrorMessage.append(key)
+                    singleErrorMessage.append(" ")
+                    if (value.isJsonArray) {
+                        values = value.asJsonArray
 
-                    for ((index, string) in values.withIndex()) {
-                        when {
-                            index > 0 && index < values.size() - 1 ->
-                                singleErrorMessage.append(", ")
-                            index > 0 && index == values.size() - 1 ->
-                                singleErrorMessage.append(" and ")
+                        for ((index, string) in values.withIndex()) {
+                            when {
+                                index > 0 && index < values.size() - 1 ->
+                                    singleErrorMessage.append(", ")
+                                index > 0 && index == values.size() - 1 ->
+                                    singleErrorMessage.append(" and ")
+                            }
+                            singleErrorMessage.append(string.asString)
                         }
-                        singleErrorMessage.append(string.asString)
+                    }
+
+                    //reflection to set errors at appropriate field
+                    try {
+                        field = address::class.java.getDeclaredField(key + "Error")
+                        field.isAccessible = true
+                        field.set(address, singleErrorMessage.toString())
+                        field.isAccessible = false
+                        address.notifyChange()
+                    } catch (e: Exception) {
+
                     }
                 }
-
-                //reflection to set errors at appropriate field
-                try {
-                    field = address::class.java.getDeclaredField(key + "Error")
-                    field.isAccessible = true
-                    field.set(address, singleErrorMessage.toString())
-                    field.isAccessible = false
-                    address.notifyChange()
-                } catch (e: Exception) {
-
-                }
             }
+        } catch (e: Exception) {
         }
-
     }
 }

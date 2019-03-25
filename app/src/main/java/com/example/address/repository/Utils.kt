@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.Gravity
 import android.widget.Toast
 import com.example.address.R
+import com.example.address.model.Address
 
 const val DEFAULT_ADDRESS_ID = "default_address_id"
 
@@ -42,4 +43,26 @@ fun showErrorToast(context: Context, e: Throwable) {
             .apply { setGravity(Gravity.CENTER, 0, 0) }
     }
     toast?.show()
+}
+
+/**
+ * method that sets values in map for sending as body parameter to api
+ *
+ * @param address the address value that will set the values in hashmap
+ *
+ * @return Unit
+ */
+fun MutableMap<String, String>.inflateMapWithValues(address: Address) {
+    this["address[firstname]"] = address.firstName
+    this["address[address1]"] = address.address1
+    if (address.address2?.isBlank() == false)
+        this["address[address2]"] = address.address2!!
+    this["address[city]"] = address.city
+    if (address.stateName?.isBlank() == false)
+        this["address[state_name]"] = address.stateName!!
+    this["address[zipcode]"] = address.zipCode
+    this["address[country_id]"] = "105"
+    this["address[state_id]"] = "1400"
+    this["address[phone]"] = "9875648521"
+    this["token"] = "52e04d83e87e509f07982e6ac851e2d2c67d1d0eabc4fe78"
 }

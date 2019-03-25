@@ -19,4 +19,7 @@
     <string name="error_load_data">Please Try Again</string>
     <string name="error_internet_connect">Please Connect to Internet</string>
     <string name="error_form_invalid">Please Fill all Fields</string>
+    <string name="content_description_splash_image">Splash Screen Image</string>
+    <string name="content_description_popup_icon">Popup Menu</string>
+    <string name="content_description_default_check_icon">Default Address</string>
 </resources>

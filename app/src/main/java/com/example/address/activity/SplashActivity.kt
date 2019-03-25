@@ -13,23 +13,21 @@ import com.example.address.repository.isInternetConnected
 
 class SplashActivity : AppCompatActivity() {
 
-    val handler by lazy { Handler() }
+    private val handler by lazy { Handler() }
 
-    val runnable by lazy {
-        object : Runnable {
-            override fun run() {
-                defaultAddressId = getDefaultAddressId()
+    private val runnable by lazy {
+        Runnable {
+            defaultAddressId = getDefaultAddressId()
 
-                val connectivityManager =
-                    this@SplashActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val connectivityManager =
+                this@SplashActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-                val networkInfo = connectivityManager.activeNetworkInfo
+            val networkInfo = connectivityManager.activeNetworkInfo
 
-                isInternetConnected = networkInfo != null && networkInfo.isConnected
+            isInternetConnected = networkInfo != null && networkInfo.isConnected
 
-                startActivity(Intent(this@SplashActivity, MainActivity::class.java))
-                finish()
-            }
+            startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+            finish()
         }
     }
 

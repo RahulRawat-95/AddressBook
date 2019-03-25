@@ -21,7 +21,6 @@ import com.example.address.repository.defaultAddressId
 import com.example.address.repository.putDefaultAddressId
 import com.example.address.repository.showErrorToast
 import com.example.address.viewModel.AddEditAddressViewModel
-import com.google.android.material.textfield.TextInputEditText
 import kotlinx.android.synthetic.main.activity_add_edit_address.*
 
 /**
@@ -44,42 +43,42 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * @property mIsUpdate for checking whether the activity was opened for adding new address or editing an existing address
      */
-    var mIsUpdate: Boolean = false
+    private var mIsUpdate: Boolean = false
 
     /**
      * @property mAddEditAddressViewModel the ViewModel associated with this Activity
      */
-    val mAddEditAddressViewModel by lazy {
+    private val mAddEditAddressViewModel by lazy {
         ViewModelProviders.of(this@AddEditAddressActivity).get(AddEditAddressViewModel::class.java)
     }
 
     /**
      * @property mAddress the Address either passed through Intent or created in this Activity
      */
-    lateinit var mAddress: Address
+    private lateinit var mAddress: Address
 
     /**
      * @property mDefaultAddressCb the Checkbox reference in this activity's layout for making specific address default
      */
-    val mDefaultAddressCb: CheckBox by lazy { findViewById<CheckBox>(R.id.cb_default_address) }
+    private val mDefaultAddressCb: CheckBox by lazy { findViewById<CheckBox>(R.id.cb_default_address) }
 
     /**
      * @property mProgressBar the ProgressBar content layout's reference in the layout for showing progress bar and disabling touches until processing finishes when
      * user submits
      */
-    val mProgressBar by lazy { findViewById<FrameLayout>(R.id.fl_loading) }
+    private val mProgressBar: FrameLayout by lazy { findViewById<FrameLayout>(R.id.fl_loading) }
 
     /**
      * @property mSubmitButton the submit button that creates or updates an address
      */
-    val mSubmitButton by lazy { findViewById<ImageButton>(R.id.imageButton) }
+    private val mSubmitButton:ImageButton by lazy { findViewById<ImageButton>(R.id.imageButton) }
 
     /**
      * @property mResultCallback the lambda callback to be called by ViewModel when the processing for creation or updating of address finishes successfully
      * @param t Throwable reference that is thrown if some error occurs while calling the Api
      * @param address Address reference that was created or updated
      */
-    val mResultCallback = { t: Throwable?, address: Address? ->
+    private val mResultCallback = { t: Throwable?, address: Address? ->
         mProgressBar.visibility = View.GONE
         //If Error occurred during api call
         if (t != null)

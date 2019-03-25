@@ -7,10 +7,7 @@ import com.example.address.network.ApiClient
 import com.example.address.repository.inflateMapWithValues
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
-import io.reactivex.Observable
-import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException

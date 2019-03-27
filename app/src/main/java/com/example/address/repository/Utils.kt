@@ -1,6 +1,7 @@
 package com.example.address.repository
 
 import android.content.Context
+import android.os.Build
 import android.view.Gravity
 import android.widget.Toast
 import com.example.address.R
@@ -66,3 +67,8 @@ fun MutableMap<String, String>.inflateMapWithValues(address: Address) {
     this["address[phone]"] = "9875648521"
     this["token"] = "52e04d83e87e509f07982e6ac851e2d2c67d1d0eabc4fe78"
 }
+
+/**
+ * method that tells if the device is pre lollipop or not
+ */
+fun isPreLollipop() = Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP

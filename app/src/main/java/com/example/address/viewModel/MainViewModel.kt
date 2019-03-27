@@ -5,10 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.address.model.Address
 import com.example.address.network.ApiClient
-import com.example.address.repository.showErrorToast
 import com.google.gson.JsonObject
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 
 /**
@@ -24,56 +23,37 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val addresses by lazy { MutableLiveData<MutableList<Address>>() }
 
     /**
-     * method that retrieves the list of address stored in the Server
-     *
-     * @param lambda the callback to be called when the api successfully returns or fails
-     *
-     * @return Unit
+     * @property addressesObservable the observable for stream of list of addresses
      */
-    fun getAddresses(lambda: (e: Throwable?) -> Unit) {
+    private val addressesObservable by lazy {
         ApiClient.apiInterface.getAddresses().subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWith(object : DisposableSingleObserver<MutableList<Address>>() {
-                override fun onSuccess(t: MutableList<Address>) {
-                    addresses.value = t
-                    lambda(null)
-                    dispose()
-                }
+            .doAfterSuccess { addresses.value = it }
+    }
 
-                override fun onError(e: Throwable) {
-                    showErrorToast(getApplication(), e)
-                    lambda(e)
-                    dispose()
-                }
-
-            })
+    /**
+     * method that returns an asynchronous stream for retrieval of list of addresses
+     *
+     * @return Single<MutableList<Address>>
+     */
+    fun getAddresses(): Single<MutableList<Address>> {
+        return addressesObservable
     }
 
     /**
      * method that deletes an address
      *
      * @param addressId the id of the address to be deleted
-     * @param lambda the callback to be called when the api successfully returns or fails
      *
-     * @return Unit
+     * @return Single<JsonObject>
      */
-    fun deleteAddress(addressId: String, lambda: (e: Throwable?) -> Unit) {
-        ApiClient.apiInterface.deleteAddress(addressId).subscribeOn(Schedulers.io())
+    fun deleteAddress(addressId: String): Single<JsonObject> {
+        return ApiClient.apiInterface.deleteAddress(addressId).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWith(object : DisposableSingleObserver<JsonObject>() {
-                override fun onSuccess(t: JsonObject) {
-                    val address = addresses.value?.find { it.id == addressId.toInt() }
-                    addresses.value = addresses.value?.apply { remove(address) }
-                    lambda(null)
-                    dispose()
-                }
-
-                override fun onError(e: Throwable) {
-                    lambda(e)
-                    dispose()
-                }
-
-            })
+            .doAfterSuccess {
+                val address = addresses.value?.find { it.id == addressId.toInt() }
+                addresses.value = addresses.value?.apply { remove(address) }
+            }
     }
 
     /**
@@ -84,7 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
      * @return Unit
      */
     fun createAddress(address: Address) {
-        addresses.value = addresses.value?.apply { add(address) }
+        addresses.value = addresses.value?.apply { add(0,address) }
     }
 
     /**

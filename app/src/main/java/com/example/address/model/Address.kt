@@ -1,5 +1,6 @@
 package com.example.address.model
 
+import android.text.TextUtils
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
 import com.example.address.BR
@@ -148,7 +149,7 @@ data class Address(@SerializedName("id") var id: Int) : BaseObservable(), Serial
 
     companion object {
         fun setErrors(prop: KMutableProperty<String?>, value: String?, error: String): Boolean {
-            return if (value?.isBlank() == true) {
+            return if (TextUtils.isEmpty(value?.trim())) {
                 prop.setter.call(error)
                 false
             } else {

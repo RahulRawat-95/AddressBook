@@ -7,8 +7,8 @@ import com.example.address.network.ApiClient
 import com.example.address.repository.inflateMapWithValues
 import com.google.gson.JsonArray
 import com.google.gson.JsonParser
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 import retrofit2.HttpException
 import java.lang.reflect.Field
@@ -26,61 +26,37 @@ class AddEditAddressViewModel(application: Application) : AndroidViewModel(appli
      * Method that creates an Address and calls the api
      *
      * @param address the address to be created
-     * @param lambda the callback to be called when api returns either successfully or fails with throwable or address respectively
      */
-    fun createAddress(
-        address: Address,
-        lambda: (e: Throwable?, id: Address?) -> Unit
-    ) {
-        ApiClient.apiInterface.createAddress(
+    fun createAddress(address: Address): Single<Address> {
+        return ApiClient.apiInterface.createAddress(
             HashMap<String, String>().apply { inflateMapWithValues(address) }
         ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWith(object : DisposableSingleObserver<Address>() {
-                override fun onSuccess(t: Address) {
-                    lambda(null, t)
-                    dispose()
-                }
-
-                override fun onError(e: Throwable) {
-                    handleError(address, e)
-                    lambda(e, null)
-                    dispose()
-                }
-
-            })
+            .doOnError { handleError(address, it) }
     }
 
     /**
      * Method that updates an Address and calls the api
      *
      * @param address the address to be updated
-     * @param lambda the callback to be called when api returns either successfully or fails with throwable or address respectively
      */
-    fun updateAddress(
-        address: Address,
-        lambda: (e: Throwable?, id: Address?) -> Unit
-    ) {
-        ApiClient.apiInterface.updateAddress(
+    fun updateAddress(address: Address): Single<Address> {
+        return ApiClient.apiInterface.updateAddress(
             address.id.toString(),
             HashMap<String, String>().apply { inflateMapWithValues(address) }
         ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribeWith(object : DisposableSingleObserver<Address>() {
-                override fun onSuccess(t: Address) {
-                    lambda(null, t)
-                    dispose()
-                }
-
-                override fun onError(e: Throwable) {
-                    handleError(address, e)
-                    lambda(e, null)
-                    dispose()
-                }
-
-            })
+            .doOnError { handleError(address, it) }
     }
 
+    /**
+     * Method that handles errors for creation or updation of addresses
+     *
+     * @param address the address parameter on which the api call was unsuccessfull
+     * @param e the error that api call returned
+     *
+     * @return Unit
+     */
     private fun handleError(address: Address, e: Throwable) {
         try {
             val httpException = e as? HttpException

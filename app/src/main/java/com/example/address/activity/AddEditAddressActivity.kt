@@ -11,7 +11,6 @@ import android.widget.CheckBox
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProviders
 import com.example.address.R
@@ -21,6 +20,7 @@ import com.example.address.repository.defaultAddressId
 import com.example.address.repository.putDefaultAddressId
 import com.example.address.repository.showErrorToast
 import com.example.address.viewModel.AddEditAddressViewModel
+import io.reactivex.observers.DisposableSingleObserver
 import kotlinx.android.synthetic.main.activity_add_edit_address.*
 
 /**
@@ -38,7 +38,7 @@ const val EXTRA_RESULT_ADDRESS = "resultAddress"
  */
 const val EXTRA_IS_UPDATE = "isUpdateCase"
 
-class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
+class AddEditAddressActivity : BaseActivity(), View.OnClickListener {
 
     /**
      * @property mIsUpdate for checking whether the activity was opened for adding new address or editing an existing address
@@ -71,35 +71,7 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
     /**
      * @property mSubmitButton the submit button that creates or updates an address
      */
-    private val mSubmitButton:ImageButton by lazy { findViewById<ImageButton>(R.id.imageButton) }
-
-    /**
-     * @property mResultCallback the lambda callback to be called by ViewModel when the processing for creation or updating of address finishes successfully
-     * @param t Throwable reference that is thrown if some error occurs while calling the Api
-     * @param address Address reference that was created or updated
-     */
-    private val mResultCallback = { t: Throwable?, address: Address? ->
-        mProgressBar.visibility = View.GONE
-        //If Error occurred during api call
-        if (t != null)
-            showErrorToast(this@AddEditAddressActivity, t)
-        else {
-            //if default address is checked then the default address id is changed
-            if (mDefaultAddressCb.isChecked)
-                defaultAddressId = address?.id ?: defaultAddressId
-            //if default address is unchecked when the address currently shown was the default address before
-            else if (defaultAddressId == address?.id)
-                defaultAddressId = -1
-
-            putDefaultAddressId(defaultAddressId)
-
-            //put extras in intent and finish the activity
-            val intent = Intent()
-            intent.putExtra(EXTRA_RESULT_ADDRESS, address)
-            setResult(Activity.RESULT_OK, intent)
-            finish()
-        }
-    }
+    private val mSubmitButton: ImageButton by lazy { findViewById<ImageButton>(R.id.imageButton) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -156,19 +128,15 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
                 mProgressBar.visibility = View.VISIBLE
 
                 //call view model's function according to mIsUpdate
-                with(mAddress) {
+                addDisposable(
                     if (mIsUpdate) {
-                        mAddEditAddressViewModel.updateAddress(
-                            this,
-                            lambda = mResultCallback
-                        )
+                        mAddEditAddressViewModel.updateAddress(mAddress)
+                            .subscribeWith(SingleObserver())
                     } else {
-                        mAddEditAddressViewModel.createAddress(
-                            this,
-                            lambda = mResultCallback
-                        )
+                        mAddEditAddressViewModel.createAddress(mAddress)
+                            .subscribeWith(SingleObserver())
                     }
-                }
+                )
             }
         }
     }
@@ -188,5 +156,32 @@ class AddEditAddressActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    /**
+     * @property SingleObserver single disposable class for create and update address streams which will handle errors and updates
+     * */
+    private inner class SingleObserver : DisposableSingleObserver<Address?>() {
+        override fun onSuccess(address: Address) {
+            mProgressBar.visibility = View.GONE
+            if (mDefaultAddressCb.isChecked)
+                defaultAddressId = address.id
+            //if default address is unchecked when the address currently shown was the default address before
+            else if (defaultAddressId == address.id)
+                defaultAddressId = -1
+
+            putDefaultAddressId(defaultAddressId)
+
+            //put extras in intent and finish the activity
+            val intent = Intent()
+            intent.putExtra(EXTRA_RESULT_ADDRESS, address)
+            setResult(Activity.RESULT_OK, intent)
+            finish()
+        }
+
+        override fun onError(e: Throwable) {
+            mProgressBar.visibility = View.GONE
+            showErrorToast(this@AddEditAddressActivity, e)
+        }
     }
 }

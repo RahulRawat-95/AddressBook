@@ -11,6 +11,16 @@ import com.example.address.repository.isInternetConnected
 class InternetReceiver : BroadcastReceiver(), InternetListener {
 
     override fun enable(context: Context) {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val networkInfo = connectivityManager.activeNetworkInfo
+
+        /**
+         * first time internet connected should be initialised when the broadcast reciever is registered because it will
+         * only detect change from now on and not tell the current status like network callback
+         */
+        isInternetConnected = networkInfo != null && networkInfo.isConnected
+
         val intentFilter = IntentFilter()
         intentFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION)
         intentFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION)

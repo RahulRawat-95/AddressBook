@@ -16,8 +16,7 @@ import com.example.address.repository.defaultAddressId
  *
  * @property context context object for popup menu
  * @property addresses list of Address to inflate
- * @property deleteLambda callback for deleting address
- * @property editLambda callback for editing address
+ * @property popupMenuLambda callback for showing popup menu
  */
 class AddressAdapter(
     private val context: Context,

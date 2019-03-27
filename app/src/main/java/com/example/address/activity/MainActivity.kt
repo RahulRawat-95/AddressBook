@@ -4,25 +4,27 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.address.R
 import com.example.address.adapter.AddressAdapter
+import com.example.address.connectivityListener.InternetListener
 import com.example.address.connectivityListener.InternetNetworkCallback
 import com.example.address.connectivityListener.InternetReceiver
 import com.example.address.model.Address
+import com.example.address.repository.isPreLollipop
 import com.example.address.repository.showErrorToast
 import com.example.address.ui.EmptyRecyclerView
 import com.example.address.viewModel.MainViewModel
+import com.google.gson.JsonObject
+import io.reactivex.observers.DisposableSingleObserver
 import kotlinx.android.synthetic.main.layout_addresses.*
 import kotlinx.android.synthetic.main.layout_addresses_empty_view.*
 
@@ -37,7 +39,7 @@ const val REQUEST_CREATE_ADDRESS = 1
  */
 const val REQUEST_UPDATE_ADDRESS = 2
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
+class MainActivity : BaseActivity(), View.OnClickListener {
 
     /**
      * @property mRecyclerView reference to RecyclerView in the Layout
@@ -82,9 +84,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         )
     }
 
-    private val mInternetReceiver by lazy { InternetReceiver() }
-
-    private val mInternetNetworkCallback by lazy { InternetNetworkCallback() }
+    /**
+     * @property mInternetListener the listener that will adjust according to the devices api level and will listen to network connection and disconnection calls
+     */
+    private val mInternetListener: InternetListener by lazy {
+        if (isPreLollipop())
+            InternetReceiver()
+        else
+            InternetNetworkCallback()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -178,7 +186,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 if (mIsFetchingAddress)
                     return true
                 mIsFetchingAddress = true
-                mMainViewModel.getAddresses { mIsFetchingAddress = false }
+
+                fetchAddresses()
+
+                //mMainViewModel.getAddresses { mIsFetchingAddress = false }
                 return true
             }
             android.R.id.home -> {
@@ -200,7 +211,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         //call api if addresses has size 0
         if (!mIsFetchingAddress && (addresses == null || addresses.size == 0)) {
             mIsFetchingAddress = true
-            mMainViewModel.getAddresses { mIsFetchingAddress = false }
+            fetchAddresses()
         }
 
         //observe the LiveData and refresh recycler view when change occurs
@@ -220,12 +231,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     private fun deleteAddress(address: Address) {
         mLoadingView.visibility = View.VISIBLE
         mIsFetchingAddress = true
-        mMainViewModel.deleteAddress(address.id.toString()) {
-            mIsFetchingAddress = false
-            mLoadingView.visibility = View.GONE
-            if (it != null)
-                showErrorToast(this@MainActivity, it)
-        }
+        addDisposable(
+            mMainViewModel.deleteAddress(address.id.toString())
+                .subscribeWith(DeleteSingleObserver())
+        )
     }
 
     /**
@@ -292,6 +301,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onActivityResult(requestCode, resultCode, data)
     }
 
+    /**
+     * Method that calls get address api to refresh list of addresses and adds the disposable to composite disposable
+     *
+     * @return Unit
+     */
+    private fun fetchAddresses() {
+        addDisposable(
+            mMainViewModel.getAddresses()
+                .subscribeWith(FetchSingleObserver())
+        )
+    }
+
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.fab_add_address, R.id.fab_add -> {
@@ -308,19 +329,52 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onDestroy()
     }
 
+    /**
+     * Method that enables Internet Connectivity Listener based on Device Android SDK version
+     *
+     * @return Unit
+     */
     private fun enableInternetListener() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            mInternetReceiver.enable(this)
-        } else {
-            mInternetNetworkCallback.enable(this)
+        mInternetListener.enable(this)
+    }
+
+    /**
+     * Method that disables Internet Connectivity Listener based on Device Android SDK version
+     *
+     * @return Unit
+     */
+    private fun disableInternetListener() {
+        mInternetListener.disable(this)
+    }
+
+    /**
+     * @property DeleteSingleObserver the inner class for single observer for delete api calls
+     */
+    private inner class DeleteSingleObserver : DisposableSingleObserver<JsonObject>() {
+        override fun onSuccess(t: JsonObject) {
+            mIsFetchingAddress = false
+            mLoadingView.visibility = View.GONE
+        }
+
+        override fun onError(e: Throwable) {
+            mIsFetchingAddress = false
+            mLoadingView.visibility = View.GONE
+            showErrorToast(this@MainActivity, e)
         }
     }
 
-    private fun disableInternetListener() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            mInternetReceiver.disable(this)
-        } else {
-            mInternetNetworkCallback.disable(this)
+    /**
+     * @property FetchSingleObserver the inner class for single observer for get addresses api calls
+     */
+    private inner class FetchSingleObserver : DisposableSingleObserver<MutableList<Address>>() {
+        override fun onSuccess(t: MutableList<Address>) {
+            mIsFetchingAddress = false
+        }
+
+        override fun onError(e: Throwable) {
+            mIsFetchingAddress = false
+            showErrorToast(application, e)
         }
     }
+
 }
